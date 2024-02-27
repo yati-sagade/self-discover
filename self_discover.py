@@ -4,9 +4,8 @@ import time
 
 from openai import OpenAI
 
-# Edit this part for your setup
-#client = OpenAI(api_key="yourkey")
-client = OpenAI(api_key="local-generated-key", base_url="http://devnuc.lan:5000/v1")
+OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 def query_llm(messages, max_tokens=2048, temperature=0.1):
@@ -14,7 +13,7 @@ def query_llm(messages, max_tokens=2048, temperature=0.1):
     while True:
         try:
             response = client.chat.completions.create(
-                model="the best model",
+                model="gpt-4",
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
@@ -25,7 +24,7 @@ def query_llm(messages, max_tokens=2048, temperature=0.1):
 
             return content
         except Exception as e:
-            print("Failure querying the AI. Retrying...")
+            print("Failure querying the AI: {}. Retrying...".format(e))
             time.sleep(1)
 
 def query_openai(prompt):
@@ -109,16 +108,20 @@ if __name__ == "__main__":
         "34. Given the problem specification and the current best solution, have a guess about other possible solutions."
         "35. Let’s imagine the current best solution is totally wrong, what other ways are there to think about the problem specification?"
         "36. What is the best way to modify this current best solution, given what you know about these kinds of problem specification?"
-        "37. Ignoring the current best solution, create an entirely new solution to the problem."
-        #"38. Let’s think step by step."
-        "39. Let’s make a step by step plan and implement it with good notation and explanation."
+        "37. Ignoring the current best solution, create an entirely new solution to the problem.",
+        #"38. Let’s think step by step.",
+        "39. Let’s make a step by step plan and implement it with good notation and explanation.",
+        "40. Can we reduce the task into one or more instances of the same task, each with a smaller input?",
     ]
 
 
-    task_example = "Lisa has 10 apples. She gives 3 apples to her friend and then buys 5 more apples from the store. How many apples does Lisa have now?"
+    # task_example = "Lisa has 10 apples. She gives 3 apples to her friend and then buys 5 more apples from the store. How many apples does Lisa have now?"
+    task_example = "What is the minimal number of operations to change coretc to correct"
 
+    straight_result = query_openai(task_example)
+    print("Straight result:\n", straight_result)
 
-
+    print("Start SELF-DISCOVER")
     selected_modules = select_reasoning_modules(task_example, reasoning_modules)
     print("Stage 1 SELECT: Selected Modules:\n", selected_modules)
     
